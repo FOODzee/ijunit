@@ -18,17 +18,17 @@ public class TestBundle1 {
         assertEquals("str", "str");
     }
 
-    @Test(expectedException = AssertTrue.class)
+    @Test(expectedExceptions = AssertTrue.class)
     void checkAssertTrueFailure() {
         assertTrue(false);
     }
 
-    @Test(expectedException = AssertFalse.class)
+    @Test(expectedExceptions = AssertFalse.class)
     void checkAssertFalseFailure() {
         assertFalse(true);
     }
 
-    @Test(expectedException = AssertEquals.class)
+    @Test(expectedExceptions = AssertEquals.class)
     void checkAssertEqualsFailure() {
         assertEquals("left", "right");
     }

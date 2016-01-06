@@ -11,6 +11,7 @@ public class Main {
         if (numberOfJobs < 1) {
             usage();
         }
+        jobs = new Vector<>(numberOfJobs);
 
         int numberOfThreads = 0;
         try {
@@ -19,9 +20,11 @@ public class Main {
             usage();
         }
         Tester[] testers = new Tester[numberOfThreads];
-        for (Tester t : testers) t.run();
+        for (int i = 0; i < numberOfThreads; i++) {
+            testers[i] = new Tester();
+            testers[i].run();
+        }
 
-        jobs = new Vector<>(numberOfJobs);
         for (int i = 1; i <= numberOfJobs; i++) {
             try {
                 jobs.add(Class.forName(args[i]));
@@ -31,11 +34,11 @@ public class Main {
             }
         }
 
-        for (Tester t : testers) t.notify();
+        for (Tester t : testers) t.interrupt();
     }
 
     private static void usage() {
-        System.out.println("java -cp ijunit.jar;<tested-classes> sc.ijunit.core.Main N class-name [class-name]*");
+        System.out.printf("Usage:\n\tjava -cp ijunit.jar;<tested-classes> sc.ijunit.core.Main N class-name [class-name]*");
         System.exit(-1);
     }
 }
