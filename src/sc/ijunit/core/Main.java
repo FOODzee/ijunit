@@ -1,4 +1,4 @@
-package sc.zachete;
+package sc.ijunit.core;
 
 public class Main {
 
