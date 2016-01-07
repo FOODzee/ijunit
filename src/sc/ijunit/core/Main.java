@@ -21,6 +21,14 @@ public class Main {
             usage();
         }
 
+        if (numberOfThreads == 0) {
+            System.out.println("You specified zero threads to use, that makes no sense.");
+            usage();
+        } else if (numberOfThreads > Runtime.getRuntime().availableProcessors()) {
+            System.out.println("You specified more threads to use than it is available.");
+            System.out.println("That makes no sense, but is not critical.");
+        }
+
         Tester[] testers = new Tester[numberOfThreads];
         for (int i = 0; i < numberOfThreads; i++) {
             testers[i] = new Tester();

@@ -106,10 +106,11 @@ public class Tester extends Thread {
 
     private void failure(String s, Class job, String msg, Throwable th) {
         synchronized (System.out) { // Safely output several strings.
+            log("/-------");
             log(s + job.getCanonicalName() + " failed :");
             log(msg);
             log(th.toString());
-            System.out.println();
+            log("\\-------");
         }
     }
 
