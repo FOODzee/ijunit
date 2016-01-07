@@ -36,7 +36,7 @@ public class Main {
             }
         }
 
-        while (!jobs.isEmpty()) {
+        while (!jobs.isEmpty()) synchronized (Thread.currentThread()) {
             try   { Thread.currentThread().wait(10); }
             catch ( InterruptedException e )
             { /* Give testers some time to check remaining tests. */ }

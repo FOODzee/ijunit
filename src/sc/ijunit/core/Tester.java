@@ -17,12 +17,12 @@ public class Tester extends Thread {
         while (!interrupted()) {
             try   { test(Main.jobs.remove(0)); }
             catch ( ArrayIndexOutOfBoundsException e )
-            { /* Give main thread some time to add new jobs. */ }
+            { /* Give main thread some time to add new jobs or interrupt us. */ }
         }
     }
 
     private void test(Class job) {
-        log("Testing of class " + job + " started.");
+        log("Testing of " + job + " started.");
 
         ArrayList<Method> methods = new ArrayList<>();
         Method before = null, after = null;
@@ -81,6 +81,9 @@ public class Tester extends Thread {
         } catch (InvocationTargetException | IllegalAccessException e) {
             methodFailure(after, job, "error while finalizing test class", e);
         }
+
+        log("Testing of " + job + " finished.");
+        System.out.println();
     }
 
     private void constrFailure(Class job, Throwable th) {
