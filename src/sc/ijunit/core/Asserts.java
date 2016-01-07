@@ -40,7 +40,7 @@ public class Asserts {
             return "AssertEquals failed: " +
                     "left=`" + left + "` " +
                     "and right=`" + right + "` " +
-                    "expected to be equal.";
+                    "expected to be equal." + getMsg();
         }
     }
 
@@ -63,22 +63,26 @@ public class Asserts {
             return "AssertAssignable failed: " +
                     "right=`" + right.getClass().getCanonicalName() + "` " +
                     "expected to be assignable to " +
-                    "left=`" + left.getClass().getCanonicalName() + "`.";
+                    "left=`" + left.getClass().getCanonicalName() + "`." + getMsg();
         }
     }
 
     static class Assert extends Error {
-        String msg;
+        private String msg;
 
         Assert(String ... msg){
-            if (msg.length != 0) {
-                this.msg = msg[0];
-            }
+            StringBuilder sb = new StringBuilder();
+            for (String s : msg) sb.append(s);
+            this.msg = sb.toString();
         }
 
         @Override
         public String toString() {
-            return this.getClass().getSimpleName() + " failed.";
+            return this.getClass().getSimpleName() + " failed." + getMsg();
+        }
+
+        protected String getMsg() {
+            return !msg.isEmpty() ? " There was message: `" + msg + "`" : "";
         }
     }
 }

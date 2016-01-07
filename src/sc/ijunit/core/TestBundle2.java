@@ -16,7 +16,7 @@ public class TestBundle2 {
         // Positive checks
         assertTrue(true);
         assertFalse(false);
-        assertEquals("str", "e");
+        assertEquals("str", "e", "How can that be? D:");
     }
 
     @Test
@@ -26,7 +26,7 @@ public class TestBundle2 {
 
     @Test(expectedExceptions = AssertFalse.class)
     public void checkAssertTrueFailure() {
-        assertTrue(false);
+        assertTrue(false, "Ooops");
     }
 
     @Test(expectedExceptions = AssertFalse.class)
