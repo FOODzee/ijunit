@@ -51,7 +51,7 @@ public class Tester extends Thread {
 
         failCounter = 0;
         for (Method t : tests) {
-            Class[] expectedExceptions = t.getDeclaredAnnotation(Test.class).expectedExceptions();
+            Class<?>[] expectedExceptions = t.getDeclaredAnnotation(Test.class).expectedExceptions();
 
             try {
                 t.invoke(jObj);
@@ -60,8 +60,8 @@ public class Tester extends Thread {
                 final Throwable e = it.getTargetException();
 
                 // Check whether we expected these exception.
-                for (Class expected : expectedExceptions) {
-                    if (e.getClass().isAssignableFrom(expected)) {
+                for (Class<?> expected : expectedExceptions) {
+                    if (expected.isAssignableFrom(e.getClass())) {
                         log("Test `" + t.getName() + "` passed");
                         break;
                     } else if (e instanceof Assert) {
@@ -81,12 +81,14 @@ public class Tester extends Thread {
             methodFailure(after, job, "error while finalizing test class", e);
         }
 
-        log("Testing of " + job + " finished " + ((failCounter == 0) ? "successful." : "with"));
-        if (failCounter == 1)
-            log("one test of " + tests.size() + " failed.");
-        else if (failCounter > 1)
-            log(failCounter + " tests of " + tests.size() + " failed.");
-        System.out.println();
+        synchronized (System.out) { // Safely output several strings.
+            log("Testing of " + job + " finished " + ((failCounter == 0) ? "successful." : "with"));
+            if (failCounter == 1)
+                log("one test of " + tests.size() + " failed.");
+            else if (failCounter > 1)
+                log(failCounter + " tests of " + tests.size() + " failed.");
+            System.out.println();
+        }
     }
 
     private void constrFailure(Class job, Throwable th) {
@@ -94,19 +96,21 @@ public class Tester extends Thread {
     }
 
     private void testFailure(Method test, Class job, String msg, Throwable th) {
-        failure("test `" + test + "` in class ", job, msg, th);
+        failure("test `" + test.getName() + "` in class ", job, msg, th);
         failCounter++;
     }
 
     private void methodFailure(Method m, Class job, String msg, Throwable th) {
-        failure("method `" + m + "` in class ", job, msg, th);
+        failure("method `" + m.getName() + "` in class ", job, msg, th);
     }
 
     private void failure(String s, Class job, String msg, Throwable th) {
-        log(s + job + " failed :");
-        log(msg);
-        log(th.toString());
-        System.out.println();
+        synchronized (System.out) { // Safely output several strings.
+            log(s + job.getCanonicalName() + " failed :");
+            log(msg);
+            log(th.toString());
+            System.out.println();
+        }
     }
 
     private void log(String msg) {

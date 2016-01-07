@@ -44,7 +44,7 @@ public class Asserts {
         }
     }
 
-    static class Assert extends Error {
+    public static class Assert extends Error {
         String msg;
 
         Assert(String ... msg){

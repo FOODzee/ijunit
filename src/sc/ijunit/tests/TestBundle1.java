@@ -18,7 +18,7 @@ public class TestBundle1 {
         assertEquals("str", "str");
     }
 
-    @Test(expectedExceptions = AssertTrue.class)
+    @Test(expectedExceptions = Assert.class)
     public void checkAssertTrueFailure() {
         assertTrue(false);
     }
