@@ -42,4 +42,9 @@ public class TestBundle2 {
     @Test(expectedExceptions = {AssertAssignable.class, AssertEquals.class, AssertTrue.class},
           strictExpectations = true)
     public static void doNothing() {}
+
+    @Test
+    public static void unexpected() {
+        throw new Error("Unexpected error", new Throwable("That's the cause of error"));
+    }
 }
