@@ -7,12 +7,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
+ * Thread responsible to testing classes from main job list.
+ * See {@link Main#jobs}.
+ *
  * @author foodzee.
  */
-public class Tester extends Thread {
+final class Tester extends Thread {
     private Class job;
-    private boolean errors;
-    private int failCounter;
+    private int failCount;
 
     @Override
     public void run() {
@@ -23,6 +25,9 @@ public class Tester extends Thread {
         }
     }
 
+    /**
+     * Performs all tests in given class.
+     */
     private void test(Class job) {
         this.job = job;
         log("Testing of " + job + " started.");
@@ -55,26 +60,24 @@ public class Tester extends Thread {
             return;
         }
 
-        errors = false;
-        failCounter = 0;
-        int skipCounter = 0;
-        int ignoreCounter = 0;
+        failCount = 0;
+        int skipCount = 0;
+        int ignoreCount = 0;
+        int finCount = 0;
 
         for (Method t : tests) {
             // Should we ignore this test?
             if (t.isAnnotationPresent(Ignore.class)) {
-                errors = true;
-                ignoreCounter++;
                 log("Test `" + t.getName() + "` ignored");
+                ignoreCount++;
                 continue;
             }
 
-            // Try to execute `@BeforeEach`-marked method
+            // Prepare to perform the test
             if (!invoke(beforeEach, jObj, "error while preparing to perform test " + t.getName())) {
-                // If it fails we can not execute this test
-                errors = true;
-                skipCounter++;
-                log("Test `" + t.getName() + "` skipped");
+                // If `beforeEach` fails we can not execute this test
+                log("Test `" + t.getName() + "` skipped due to preparation error");
+                skipCount++;
                 continue;
             }
 
@@ -117,21 +120,53 @@ public class Tester extends Thread {
                 testFailure(t, "illegal access", ia);
             }
 
-            invoke(afterEach, jObj, "error while finalizing test case " + t.getName());
+            // Test ended, do something if needed.
+            if (!invoke(afterEach, jObj, "error while finalizing test case " + t.getName())) finCount++;
         }
 
         // No more test to do, finalize test class
-        invoke(after, jObj, "error while finalizing test class");
+        boolean afterFailed = !invoke(after, jObj, "error while finalizing test class");
 
-        // Write out how good everything went
+        // Write out how good (or bad) everything went
+        boolean errors = (failCount > 0) || (skipCount > 0) || (ignoreCount > 0) || (finCount > 0) || afterFailed;
         synchronized (System.out) { // Safely output several strings.
             log("Testing of " + job + " finished " + (!errors ? "successful." : "with"));
-            outProblem(failCounter,   tests.size(), " failed.");
-            outProblem(skipCounter,   tests.size(), " skipped.");
-            outProblem(ignoreCounter, tests.size(), " ignored.");
+            outProblem(failCount,   tests.size(), " failed.");
+            outProblem(skipCount,   tests.size(), " skipped.");
+            outProblem(ignoreCount, tests.size(), " ignored.");
+            outProblem(finCount,    tests.size(), " caused problems during finalization.");
+            if (afterFailed) log ("problems during finalization of test class.");
+            log("");
         }
     }
 
+    /**
+     * Reports how much tests ended with specific state.
+     * Reports nothing if {@code count = 0}.
+     *
+     * @param count Number to report
+     * @param testsNumber Overall amount of tests
+     * @param state End state
+     */
+    private void outProblem(int count, int testsNumber, String state) {
+        if (count == 1)
+            log("one test of " + testsNumber + state);
+        else if (count > 1)
+            log(count + " tests of " + testsNumber + state);
+    }
+
+    /**
+     * Invokes reflective method `m` of object `jObj`.
+     * If invocation caused no errors returns {@code true},
+     * otherwise reports failure and returns {@code false}.
+     *
+     * @param m    Method to invoke
+     * @param jObj Object of class this method belongs to
+     * @param msg  String to put to log
+     *
+     * @return     {@code true} if invocation succeeded (or there was no one)
+     *             {@code false} if there was a failure.
+     */
     private boolean invoke(Method m, Object jObj, String msg) {
         if (m != null) try {
             m.invoke(jObj);
@@ -142,18 +177,17 @@ public class Tester extends Thread {
         return true;
     }
 
+    private void methodFailure(Method m, String msg, Throwable th) {
+        failure("method `" + m.getName() + "` in class ", msg, th);
+    }
+
     private void constrFailure(Throwable th) {
         failure("instantiating of class ", "", th);
     }
 
     private void testFailure(Method test, String msg, Throwable th) {
         failure("test `" + test.getName() + "` in class ", msg, th);
-        failCounter++;
-        errors = true;
-    }
-
-    private void methodFailure(Method m, String msg, Throwable th) {
-        failure("method `" + m.getName() + "` in class ", msg, th);
+        failCount++;
     }
 
     private void failure(String s, String msg, Throwable th) {
@@ -164,13 +198,6 @@ public class Tester extends Thread {
             if (th != null) log(th.toString());
             log("\\-------");
         }
-    }
-
-    private void outProblem(int counter, int testsNumber, String state) {
-        if (counter == 1)
-            log("one test of " + testsNumber + state);
-        else if (counter > 1)
-            log(counter + " tests of " + testsNumber + state);
     }
 
     private void log(String msg) {

@@ -1,6 +1,8 @@
 package sc.ijunit.core;
 
 /**
+ * Assert expressions to be used in {@code @Test}-annotated methods.
+ *
  * @author foodzee.
  */
 public class Asserts {
@@ -21,6 +23,9 @@ public class Asserts {
         AssertFalse(String ... msg) {super(msg);}
     }
 
+    /**
+     * Asserts that {@code left} is equal to {@code right}.
+     */
     public static void assertEquals(Object left, Object right, String ... msg) {
         if (!left.equals(right))
             throw new AssertEquals(left, right, msg);
@@ -44,6 +49,10 @@ public class Asserts {
         }
     }
 
+    /**
+     * Asserts that {@code right} is assignable to {@code left},
+     * i.e. code {@code left = right} is correct.
+     */
     public static void assertAssignable(Object left, Object right, String ... msg) {
         if (!left.getClass().isAssignableFrom(right.getClass()))
             throw new AssertAssignable (left, right, msg);

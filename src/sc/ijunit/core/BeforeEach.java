@@ -7,6 +7,8 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
+ * Annotation to mark method, that should be executed before each test case.
+ *
  * @author foodzee.
  */
 @Target(METHOD)

@@ -4,8 +4,22 @@ import java.util.Vector;
 
 public class Main {
 
+    /**
+     * All the classes to be tested.
+     * {@link Tester}s will get theirs jobs from here.
+     */
     static volatile Vector<Class> jobs;
 
+    /**
+     * Entry point of testing system.
+     * Arguments must be specified in the following way:
+     * <ul>
+     * <li> 1) number of threads to occupy by testers;  </li>
+     * <li> 2) first class with @Test annotated methods;</li>
+     * <li> ...                                         </li>
+     * <li> n) last class with @Test annotated methods. </li>
+     * </ul>
+     */
     public static void main(String[] args) {
         final int numberOfJobs = args.length - 1;
         if (numberOfJobs < 1) {
