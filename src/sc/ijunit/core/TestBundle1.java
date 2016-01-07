@@ -55,4 +55,8 @@ public class TestBundle1 {
     public void checkWrongAssignment2() {
         assertAssignable(assEq, assTrue);
     }
+
+    @Test(expectedExceptions = {AssertAssignable.class, AssertEquals.class, AssertTrue.class},
+          strictExpectations = false)
+    public static void doNothing() {}
 }

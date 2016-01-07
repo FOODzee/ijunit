@@ -51,17 +51,30 @@ public class Tester extends Thread {
 
         failCounter = 0;
         for (Method t : tests) {
-            Class<?>[] expectedExceptions = t.getDeclaredAnnotation(Test.class).expectedExceptions();
+            final Test annot = t.getDeclaredAnnotation(Test.class);
+            Class<?>[] expectedExceptions = annot.expectedExceptions();
 
-            try {
+            try { // to pass the test
                 t.invoke(jObj);
-                log("Test `" + t.getName() + "` passed");
-            } catch (InvocationTargetException it) {
+
+                if (annot.strictExpectations() && expectedExceptions.length != 0) {
+                    // we strongly hoped our test to throw something expected, but it doesn't
+                    StringBuilder sb = new StringBuilder();
+                    for (Class<?> expected : expectedExceptions) {
+                        sb.append("\n\t").append(expected.getCanonicalName());
+                    }
+
+                    testFailure(t, job, "one of the following exceptions expected, but non occurred:" + sb, null);
+                } else { // everything worked ok
+                    log("Test `" + t.getName() + "` passed");
+                }
+            } catch (InvocationTargetException it) { // something went wrong
                 final Throwable e = it.getTargetException();
 
                 // Check whether we expected these exception.
                 for (Class<?> expected : expectedExceptions) {
                     if (expected.isAssignableFrom(e.getClass())) {
+                        // but not too wrong, test expected such behaviour
                         log("Test `" + t.getName() + "` passed");
                         break;
                     } else if (e instanceof Assert) {
@@ -86,8 +99,7 @@ public class Tester extends Thread {
             if (failCounter == 1)
                 log("one test of " + tests.size() + " failed.");
             else if (failCounter > 1)
-                log(failCounter + " tests of " + tests.size() + " failed.");
-            System.out.println();
+                log(failCounter + " tests of " + tests.size() + " failed.\n");
         }
     }
 
@@ -109,12 +121,12 @@ public class Tester extends Thread {
             log("/-------");
             log(s + job.getCanonicalName() + " failed :");
             log(msg);
-            log(th.toString());
+            if (th != null) log(th.toString());
             log("\\-------");
         }
     }
 
     private void log(String msg) {
-        System.out.println(getId() + ": " + msg);
+        System.out.printf(getId() + ": " + msg + "\n");
     }
 }

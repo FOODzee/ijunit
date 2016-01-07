@@ -12,6 +12,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface Test {
     Class<? extends Throwable>[] expectedExceptions() default DEFAULT.class;
+    boolean strictExpectations() default false;
 
     final class DEFAULT extends Throwable {}
 }

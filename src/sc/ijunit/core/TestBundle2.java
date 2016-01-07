@@ -12,7 +12,7 @@ import static sc.ijunit.core.Asserts.*;
 public class TestBundle2 {
 
     @Test
-    public void checkAsserts() {
+    public static void checkAsserts() {
         // Positive checks
         assertTrue(true);
         assertFalse(false);
@@ -20,22 +20,26 @@ public class TestBundle2 {
     }
 
     @Test
-    public void checkAssignable() {
+    public static void checkAssignable() {
         assertAssignable("", new Assert());
     }
 
     @Test(expectedExceptions = AssertFalse.class)
-    public void checkAssertTrueFailure() {
+    public static void checkAssertTrueFailure() {
         assertTrue(false, "Ooops");
     }
 
     @Test(expectedExceptions = AssertFalse.class)
-    public void checkAssertFalseFailure() {
+    public static void checkAssertFalseFailure() {
         assertFalse(true);
     }
 
     @Test(expectedExceptions = AssertEquals.class)
-    public void checkAssertEqualsFailure() {
+    public static void checkAssertEqualsFailure() {
         assertEquals("left", "right");
     }
+
+    @Test(expectedExceptions = {AssertAssignable.class, AssertEquals.class, AssertTrue.class},
+          strictExpectations = true)
+    public static void doNothing() {}
 }
