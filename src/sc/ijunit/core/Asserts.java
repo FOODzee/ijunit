@@ -23,10 +23,25 @@ public class Asserts {
 
     public static void assertEquals(Object left, Object right, String ... msg) {
         if (!left.equals(right))
-            throw new AssertEquals(msg);
+            throw new AssertEquals(left, right, msg);
     }
     public static class AssertEquals extends Assert {
-        AssertEquals(String ... msg) {super(msg);}
+        private final Object left;
+        private final Object right;
+
+        AssertEquals(Object left, Object right, String ... msg) {
+            super(msg);
+            this.left = left;
+            this.right = right;
+        }
+
+        @Override
+        public String toString() {
+            return "AssertEquals failed: " +
+                    "left=`" + left + "` " +
+                    "and right=`" + right + "` " +
+                    "expected to be equal.";
+        }
     }
 
     static class Assert extends Error {
@@ -36,6 +51,11 @@ public class Asserts {
             if (msg.length != 0) {
                 this.msg = msg[0];
             }
+        }
+
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName() + " failed.";
         }
     }
 }
