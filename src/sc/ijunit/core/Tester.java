@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * @author foodzee.
  */
 public class Tester extends Thread {
-    private final long threadID = getId();
+    private int failCounter;
 
     @Override
     public void run() {
@@ -24,12 +24,12 @@ public class Tester extends Thread {
     private void test(Class job) {
         log("Testing of " + job + " started.");
 
-        ArrayList<Method> methods = new ArrayList<>();
+        ArrayList<Method> tests = new ArrayList<>();
         Method before = null, after = null;
         for (Method m : job.getDeclaredMethods()) {
             if (m.isAnnotationPresent(Before.class)) before = m;
             if (m.isAnnotationPresent(After.class))  after  = m;
-            if (m.isAnnotationPresent(Test.class))   methods.add(m);
+            if (m.isAnnotationPresent(Test.class))   tests.add(m);
         }
 
         Object jObj;
@@ -37,6 +37,7 @@ public class Tester extends Thread {
             jObj = job.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             constrFailure(job, e);
+            log("Testing of " + job + " failed.");
             return;
         }
 
@@ -44,35 +45,33 @@ public class Tester extends Thread {
             before.invoke(jObj);
         } catch (InvocationTargetException | IllegalAccessException e) {
             methodFailure(before, job, "error while preparing test class", e);
+            log("Testing of " + job + " failed.");
             return;
         }
 
-        for (Method m : methods) {
-            Class<? extends Throwable>[] expectedExceptions =
-                    m.getDeclaredAnnotation(Test.class).expectedExceptions();
+        failCounter = 0;
+        for (Method t : tests) {
+            Class[] expectedExceptions = t.getDeclaredAnnotation(Test.class).expectedExceptions();
 
             try {
-                m.invoke(jObj);
-                log("Test `" + m + "` passed");
+                t.invoke(jObj);
+                log("Test `" + t.getName() + "` passed");
             } catch (InvocationTargetException it) {
                 final Throwable e = it.getTargetException();
-                boolean passed = false;
 
-                for (Class<? extends Throwable> expected : expectedExceptions) {
+                // Check whether we expected these exception.
+                for (Class expected : expectedExceptions) {
                     if (e.getClass().isAssignableFrom(expected)) {
-                        log("Test `" + m + "` passed");
-                        passed = true;
+                        log("Test `" + t.getName() + "` passed");
                         break;
+                    } else if (e instanceof Assert) {
+                        testFailure(t, job, "assertion haven't passed", e);
                     } else {
-                        testFailure(m, job, "unexpected exception has been thrown:", e);
+                        testFailure(t, job, "unexpected exception has been thrown:", e);
                     }
                 }
-
-                if (!passed && e instanceof Assert) {
-                    testFailure(m, job, "assertion haven't passed", e);
-                }
             } catch (IllegalAccessException ia) {
-                testFailure(m, job, "illegal access", ia);
+                testFailure(t, job, "illegal access", ia);
             }
         }
 
@@ -82,7 +81,11 @@ public class Tester extends Thread {
             methodFailure(after, job, "error while finalizing test class", e);
         }
 
-        log("Testing of " + job + " finished.");
+        log("Testing of " + job + " finished " + ((failCounter == 0) ? "successful." : "with"));
+        if (failCounter == 1)
+            log("one test of " + tests.size() + " failed.");
+        else if (failCounter > 1)
+            log(failCounter + " tests of " + tests.size() + " failed.");
         System.out.println();
     }
 
@@ -92,6 +95,7 @@ public class Tester extends Thread {
 
     private void testFailure(Method test, Class job, String msg, Throwable th) {
         failure("test `" + test + "` in class ", job, msg, th);
+        failCounter++;
     }
 
     private void methodFailure(Method m, Class job, String msg, Throwable th) {
@@ -106,6 +110,6 @@ public class Tester extends Thread {
     }
 
     private void log(String msg) {
-        System.out.println(threadID + ": " + msg);
+        System.out.println(getId() + ": " + msg);
     }
 }
