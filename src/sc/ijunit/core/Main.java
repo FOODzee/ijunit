@@ -17,12 +17,14 @@ public class Main {
         try {
             numberOfThreads = Integer.decode(args[0]);
         } catch (NumberFormatException e) {
+            System.out.println("First parameter must be an integer specifying number of threads to use.");
             usage();
         }
+
         Tester[] testers = new Tester[numberOfThreads];
         for (int i = 0; i < numberOfThreads; i++) {
             testers[i] = new Tester();
-            testers[i].run();
+            testers[i].start();
         }
 
         for (int i = 1; i <= numberOfJobs; i++) {
@@ -32,6 +34,12 @@ public class Main {
                 System.out.println(e + " at position " + i);
                 usage();
             }
+        }
+
+        while (!jobs.isEmpty()) {
+            try   { Thread.currentThread().wait(10); }
+            catch ( InterruptedException e )
+            { /* Give testers some time to check remaining tests. */ }
         }
 
         for (Tester t : testers) t.interrupt();

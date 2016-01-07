@@ -10,16 +10,20 @@ import java.util.ArrayList;
  * @author foodzee.
  */
 public class Tester extends Thread {
+    private final long threadID = getId();
+
     @Override
     public void run() {
         while (!interrupted()) {
             try   { test(Main.jobs.remove(0)); }
             catch ( ArrayIndexOutOfBoundsException e )
-            { /* `jobs.remove` may throw IOB if there is no jobs yet */ }
+            { /* Give main thread some time to add new jobs. */ }
         }
     }
 
     private void test(Class job) {
+        log("Testing of class " + job + " started.");
+
         ArrayList<Method> methods = new ArrayList<>();
         Method before = null, after = null;
         for (Method m : job.getDeclaredMethods()) {
@@ -28,21 +32,19 @@ public class Tester extends Thread {
             if (m.isAnnotationPresent(Test.class))   methods.add(m);
         }
 
-        Object jObj = null;
-        if (before != null) {
-            try {
-                jObj = job.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                constrFailure(job, e);
-                return;
-            }
+        Object jObj;
+        try {
+            jObj = job.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            constrFailure(job, e);
+            return;
+        }
 
-            try {
-                before.invoke(jObj);
-            } catch (InvocationTargetException | IllegalAccessException e) {
-                methodFailure(before, job, "error while preparing test class", e);
-                return;
-            }
+        if (before != null) try {
+            before.invoke(jObj);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            methodFailure(before, job, "error while preparing test class", e);
+            return;
         }
 
         for (Method m : methods) {
@@ -51,16 +53,23 @@ public class Tester extends Thread {
 
             try {
                 m.invoke(jObj);
+                log("Test `" + m + "` passed");
             } catch (InvocationTargetException it) {
                 final Throwable e = it.getTargetException();
-                if (e instanceof Assert) {
-                    testFailure(m, job, "assertion haven't passed", e);
-                } else {
-                    for (Class<? extends Throwable> expected : expectedExceptions) {
-                        if (! e.getClass().isAssignableFrom(expected)) {
-                            testFailure(m, job, "unexpected exception has been thrown:", e);
-                        }
+                boolean passed = false;
+
+                for (Class<? extends Throwable> expected : expectedExceptions) {
+                    if (e.getClass().isAssignableFrom(expected)) {
+                        log("Test `" + m + "` passed");
+                        passed = true;
+                        break;
+                    } else {
+                        testFailure(m, job, "unexpected exception has been thrown:", e);
                     }
+                }
+
+                if (!passed && e instanceof Assert) {
+                    testFailure(m, job, "assertion haven't passed", e);
                 }
             } catch (IllegalAccessException ia) {
                 testFailure(m, job, "illegal access", ia);
@@ -79,16 +88,21 @@ public class Tester extends Thread {
     }
 
     private void testFailure(Method test, Class job, String msg, Throwable th) {
-        failure("test " + test + " in class ", job, msg, th);
+        failure("test `" + test + "` in class ", job, msg, th);
     }
 
     private void methodFailure(Method m, Class job, String msg, Throwable th) {
-        failure("method " + m + " in class ", job, msg, th);
+        failure("method `" + m + "` in class ", job, msg, th);
     }
 
     private void failure(String s, Class job, String msg, Throwable th) {
-        System.out.println(s + job + " failed :");
-        System.out.println(msg);
-        System.out.println(th);
+        log(s + job + " failed :");
+        log(msg);
+        log(th.toString());
+        System.out.println();
+    }
+
+    private void log(String msg) {
+        System.out.println(threadID + ": " + msg);
     }
 }

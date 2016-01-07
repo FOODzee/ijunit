@@ -11,7 +11,7 @@ import static sc.ijunit.core.Asserts.*;
 public class TestBundle1 {
 
     @Test
-    void checkAsserts() {
+    public void checkAsserts() {
         // Positive checks
         assertTrue(true);
         assertFalse(false);
@@ -19,17 +19,17 @@ public class TestBundle1 {
     }
 
     @Test(expectedExceptions = AssertTrue.class)
-    void checkAssertTrueFailure() {
+    public void checkAssertTrueFailure() {
         assertTrue(false);
     }
 
     @Test(expectedExceptions = AssertFalse.class)
-    void checkAssertFalseFailure() {
+    public void checkAssertFalseFailure() {
         assertFalse(true);
     }
 
     @Test(expectedExceptions = AssertEquals.class)
-    void checkAssertEqualsFailure() {
+    public void checkAssertEqualsFailure() {
         assertEquals("left", "right");
     }
 }
