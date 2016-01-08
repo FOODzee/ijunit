@@ -11,17 +11,27 @@ public class Asserts {
         if (!condition)
             throw new AssertTrue(msg);
     }
-    static class AssertTrue extends Assert {
-        AssertTrue(String ... msg) {super(msg);}
+
+    /**
+     * Exception of this type will be thrown if corresponding assertion fails.
+     */
+    public static class AssertTrue extends Assert {
+        public AssertTrue(String ... msg) {super(msg);}
     }
+
 
     public static void assertFalse(boolean condition, String ... msg) {
         if (condition)
             throw new AssertFalse(msg);
     }
-    static class AssertFalse extends Assert {
-        AssertFalse(String ... msg) {super(msg);}
+
+    /**
+     * Exception of this type will be thrown if corresponding assertion fails.
+     */
+    public static class AssertFalse extends Assert {
+        public AssertFalse(String ... msg) {super(msg);}
     }
+
 
     /**
      * Asserts that {@code left} is equal to {@code right}.
@@ -30,11 +40,15 @@ public class Asserts {
         if (!left.equals(right))
             throw new AssertEquals(left, right, msg);
     }
-    static class AssertEquals extends Assert {
+
+    /**
+     * Exception of this type will be thrown if corresponding assertion fails.
+     */
+    public static class AssertEquals extends Assert {
         private final Object left;
         private final Object right;
 
-        AssertEquals(Object left, Object right, String ... msg) {
+        public AssertEquals(Object left, Object right, String ... msg) {
             super(msg);
             this.left = left;
             this.right = right;
@@ -49,6 +63,7 @@ public class Asserts {
         }
     }
 
+
     /**
      * Asserts that {@code right} is assignable to {@code left},
      * i.e. code {@code left = right} is correct.
@@ -57,11 +72,15 @@ public class Asserts {
         if (!left.getClass().isAssignableFrom(right.getClass()))
             throw new AssertAssignable (left, right, msg);
     }
-    static class AssertAssignable extends Assert {
+
+    /**
+     * Exception of this type will be thrown if corresponding assertion fails.
+     */
+    public static class AssertAssignable extends Assert {
         private final Object left;
         private final Object right;
 
-        AssertAssignable(Object left, Object right, String ... msg) {
+        public AssertAssignable(Object left, Object right, String ... msg) {
             super(msg);
             this.left = left;
             this.right = right;
@@ -76,10 +95,14 @@ public class Asserts {
         }
     }
 
-    static class Assert extends Error {
+
+    /**
+     * Base class for all assertion errors.
+     */
+    public static class Assert extends Error {
         private String msg;
 
-        Assert(String ... msg){
+        public Assert(String ... msg){
             StringBuilder sb = new StringBuilder();
             for (String s : msg) sb.append(s);
             this.msg = sb.toString();
@@ -91,7 +114,7 @@ public class Asserts {
         }
 
         protected String getMsg() {
-            return !msg.isEmpty() ? " There was message: `" + msg + "`" : "";
+            return !msg.isEmpty() ? "\n\t\tThere was message: `" + msg + "`" : "";
         }
     }
 }

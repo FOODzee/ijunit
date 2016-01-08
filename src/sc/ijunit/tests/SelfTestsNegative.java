@@ -1,4 +1,9 @@
-package sc.ijunit.core;
+package sc.ijunit.tests;
+
+import sc.ijunit.core.Before;
+import sc.ijunit.core.BeforeEach;
+import sc.ijunit.core.Ignore;
+import sc.ijunit.core.Test;
 
 import static sc.ijunit.core.Asserts.*;
 
@@ -9,11 +14,23 @@ import static sc.ijunit.core.Asserts.*;
  * @author foodzee.
  */
 @SuppressWarnings("unused")
-public class TestBundle2 {
+public class SelfTestsNegative {
+
+    private int counter;
+
+    @Before
+    public void setCounter() {
+        counter = 1;
+    }
+
+    @BeforeEach
+    public void checkCounter() throws Throwable {
+        if (counter > 7) throw new Throwable("counter > 7");
+        counter++;
+    }
 
     @Test
     public static void checkAsserts() {
-        // Positive checks
         assertTrue(true);
         assertFalse(false);
         assertEquals("str", "e", "How can that be? D:");
@@ -45,6 +62,19 @@ public class TestBundle2 {
 
     @Test
     public static void unexpected() {
-        throw new Error("Unexpected error", new Throwable("That's the cause of error"));
+        throw new Error("Unexpected error",
+                new Throwable("That's the cause of error",
+                        new Exception("That's the cause of throwable")));
     }
+
+    @Ignore
+    public void ignore() {
+        System.err.println("You supposed to ignore me!");
+    }
+
+    @Test
+    public void zzz1() {}
+
+    @Test
+    public void zzz2() {}
 }

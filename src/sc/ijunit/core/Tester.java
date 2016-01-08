@@ -41,7 +41,8 @@ final class Tester extends Thread {
             if (m.isAnnotationPresent(AfterEach.class))  afterEach  = m;
             if (m.isAnnotationPresent(Before.class))     before = m;
             if (m.isAnnotationPresent(After.class))      after  = m;
-            if (m.isAnnotationPresent(Test.class))       tests.add(m);
+            if (m.isAnnotationPresent(Test.class) ||
+                m.isAnnotationPresent(Ignore.class))     tests.add(m);
         }
 
         // Instantiate test class
@@ -50,13 +51,13 @@ final class Tester extends Thread {
             jObj = job.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             constrFailure(e);
-            log("Testing of " + job + " failed.");
+            log("Testing of " + job + " failed. See details above.\n");
             return;
         }
 
         // Prepare test class
         if (!invoke(before, jObj, "error while preparing test class")) {
-            log("Testing of " + job + " failed.");
+            log("Testing of " + job + " failed. See details above.\n");
             return;
         }
 
@@ -74,9 +75,9 @@ final class Tester extends Thread {
             }
 
             // Prepare to perform the test
-            if (!invoke(beforeEach, jObj, "error while preparing to perform test " + t.getName())) {
+            if (!invoke(beforeEach, jObj, "error while preparing to perform test " + t.getName() + ":")) {
                 // If `beforeEach` fails we can not execute this test
-                log("Test `" + t.getName() + "` skipped due to preparation error");
+                log("Test `" + t.getName() + "` skipped due to preparation error. See details above.");
                 skipCount++;
                 continue;
             }
@@ -195,7 +196,12 @@ final class Tester extends Thread {
             log("/-------");
             log(s + job.getCanonicalName() + " failed :");
             log(msg);
-            if (th != null) log(th.toString());
+            if (th != null) { // Write out given Throwable with all causes.
+                log(th.toString());
+                while ((th = th.getCause()) != null) {
+                    log("caused by " + th.toString());
+                }
+            }
             log("\\-------");
         }
     }

@@ -1,4 +1,7 @@
-package sc.ijunit.core;
+package sc.ijunit.tests;
+
+import sc.ijunit.core.Before;
+import sc.ijunit.core.Test;
 
 import static sc.ijunit.core.Asserts.*;
 
@@ -9,7 +12,7 @@ import static sc.ijunit.core.Asserts.*;
  * @author foodzee.
  */
 @SuppressWarnings("unused")
-public class TestBundle1 {
+public class SelfTestsPositive {
 
     private Assert ass;
     private AssertEquals assEq;
@@ -27,6 +30,7 @@ public class TestBundle1 {
         // Positive checks
         assertTrue(true);
         assertFalse(false);
+        assertEquals(42, 42);
         assertEquals("str", "str");
         assertAssignable(ass, assEq);
     }
