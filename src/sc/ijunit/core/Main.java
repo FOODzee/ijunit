@@ -53,7 +53,8 @@ public class Main {
             try {
                 jobs.add(Class.forName(args[i]));
             } catch (ClassNotFoundException e) {
-                System.out.println(e + " at position " + i);
+                System.out.println(e + " at " + i + " argument");
+                interruptAndWait(testers);
                 usage();
             }
         }
@@ -64,11 +65,26 @@ public class Main {
             { /* Give testers some time to check remaining tests. */ }
         }
 
+        interruptAndWait(testers);
+    }
+
+    protected static void interruptAndWait(Tester[] testers) {
         for (Tester t : testers) t.interrupt();
+
+        boolean aliveTesters = true;
+        while (aliveTesters) synchronized (Thread.currentThread()) {
+            aliveTesters = false;
+            for (Tester t : testers) {
+                if (t.isAlive()) {
+                    aliveTesters = true;
+                    break;
+                }
+            }
+        }
     }
 
     private static void usage() {
-        System.out.printf("Usage:\n\tjava -cp ijunit.jar;<tested-classes> sc.ijunit.core.Main N class-name [class-name]*");
+        System.out.printf("Usage:\n\tjava -cp ijunit.jar;<tested-classes> sc.ijunit.core.Main N class-name [class-name]*\n");
         System.exit(-1);
     }
 }
