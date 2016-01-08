@@ -5,7 +5,7 @@ package sc.ijunit.core;
  *
  * @author foodzee.
  */
-public class Asserts {
+public final class Asserts {
 
     public static void assertTrue(boolean condition, String ... msg) {
         if (!condition)

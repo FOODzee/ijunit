@@ -207,6 +207,6 @@ final class Tester extends Thread {
     }
 
     private void log(String msg) {
-        Main.logger.log(getId() + Logger.sep + msg + "\n");
+        Main.logger.log(new Logger.Message(getId(), msg + "\n"));
     }
 }
