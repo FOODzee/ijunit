@@ -10,7 +10,7 @@ public class Main {
      * All the classes to be tested.
      * {@link Tester}s will get theirs jobs from here.
      */
-    static volatile Vector<Class> jobs;
+    static Vector<Class> jobs;
 
     /**
      * Entry point of testing system.
