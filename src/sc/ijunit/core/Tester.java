@@ -130,13 +130,13 @@ final class Tester extends Thread {
 
         // Write out how good (or bad) everything went
         boolean errors = (failCount > 0) || (skipCount > 0) || (ignoreCount > 0) || (finCount > 0) || afterFailed;
-        synchronized (System.out) { // Safely output several strings.
+        synchronized (Main.logger) { // Safely output several strings.
             log("Testing of " + job + " finished " + (!errors ? "successful." : "with"));
             outProblem(failCount,   tests.size(), " failed.");
             outProblem(skipCount,   tests.size(), " skipped.");
             outProblem(ignoreCount, tests.size(), " ignored.");
             outProblem(finCount,    tests.size(), " caused problems during finalization.");
-            if (afterFailed) log ("problems during finalization of test class.");
+            if (afterFailed) log ("\tproblems during finalization of test class.");
             log("");
         }
     }
@@ -151,9 +151,9 @@ final class Tester extends Thread {
      */
     private void outProblem(int count, int testsNumber, String state) {
         if (count == 1)
-            log("one test of " + testsNumber + state);
+            log("\tone test of " + testsNumber + state);
         else if (count > 1)
-            log(count + " tests of " + testsNumber + state);
+            log("\t" + count + " tests of " + testsNumber + state);
     }
 
     /**
@@ -192,7 +192,7 @@ final class Tester extends Thread {
     }
 
     private void failure(String s, String msg, Throwable th) {
-        synchronized (System.out) { // Safely output several strings.
+        synchronized (Main.logger) { // Safely output several strings.
             log("/-------");
             log(s + job.getCanonicalName() + " failed :");
             log(msg);
@@ -207,6 +207,6 @@ final class Tester extends Thread {
     }
 
     private void log(String msg) {
-        System.out.printf(getId() + ": " + msg + "\n");
+        Main.logger.log(getId() + Logger.sep + msg + "\n");
     }
 }
