@@ -14,7 +14,7 @@ final class Logger {
     private boolean silent = false;
     private boolean noThreadIDsInLog = false;
     private PrintWriter log = null;
-    private ArrayList<Message> messages;
+    private Vector<Message> messages;
 
     /**
      * Init logger from command line arguments and remove them
@@ -23,7 +23,7 @@ final class Logger {
      * @return command line arguments without logger's
      * @throws InvalidArgumentException if log file not specified or cannot be opened
      */
-    public String[] init(String[] a) throws InvalidArgumentException {
+    String[] init(String[] a) throws InvalidArgumentException {
         ArrayDeque<String> args = new ArrayDeque<>(Arrays.asList(a));
         Iterator<String> iter = args.iterator();
         while (iter.hasNext()) {
@@ -38,7 +38,7 @@ final class Logger {
                 String logName = iter.next();
                 try {
                     log = new PrintWriter(logName);
-                    messages = new ArrayList<>();
+                    messages = new Vector<>();
                 } catch (FileNotFoundException e) {
                     throw new InvalidArgumentException("File you specified as log cannot be opened/created.");
                 }
@@ -59,7 +59,7 @@ final class Logger {
      * Saves given message to log.
      * Echoes it to standard output if only `-silent` option wasn't specified.
      */
-    void log(Message msg) {
+    synchronized void log(Message msg) {
         if (!silent) System.out.printf(msg.full());
         if (log != null) messages.add(msg);
     }

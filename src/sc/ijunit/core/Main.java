@@ -75,7 +75,7 @@ public class Main {
      * Wait while testers finish all jobs in the list
      * then interrupt them, but wait for last job to be finished.
      */
-    protected static void softlyInterrupt(Tester[] testers) {
+    private static void softlyInterrupt(Tester[] testers) {
         try { synchronized (Thread.currentThread()) {
             while (!jobs.isEmpty()) {
                 // Give testers some time to check remaining tests.
